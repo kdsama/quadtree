@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type QuadTree struct {
 	val      int
 	x        [2]int // max value of x
@@ -46,7 +48,7 @@ func (qt *QuadTree) Traverse() {
 		if node == nil {
 			return
 		}
-
+		fmt.Println("Node value-->", node.val, "at depth", depth, node.x, node.y)
 		for _, n := range node.children {
 			dfs(n, depth+1)
 		}
@@ -54,9 +56,39 @@ func (qt *QuadTree) Traverse() {
 	dfs(qt, 0)
 }
 
+func (qt *QuadTree) Add(value, x, y int) {
+	var dfs func(node *QuadTree)
+	dfs = func(node *QuadTree) {
+		if node == nil {
+			return
+		}
+		node.val += value
+		for _, n := range node.children {
+			if n == nil {
+				continue
+			}
+			if n.x[0] <= x && n.x[1] >= x {
+				if n.y[0] <= y && n.y[1] >= y {
+					dfs(n)
+				}
+			}
+
+		}
+	}
+	dfs(qt)
+}
+
 func main() {
 
-	x := 256
+	arr := newFunction(10)
+	qt := New(arr, 3)
+	qt.Traverse()
+	qt.Add(5, 2, 5)
+	qt.Traverse()
+}
+
+func newFunction(size int) [][]int {
+	x := size
 	arr := make([][]int, x)
 	for i := range arr {
 		arr[i] = make([]int, x+37)
@@ -67,6 +99,5 @@ func main() {
 
 		}
 	}
-	qt := New(arr, 256)
-	qt.Traverse()
+	return arr
 }
