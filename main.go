@@ -1,15 +1,18 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type QuadTree struct {
+	lvl      int
 	val      int
 	x        [2]int // max value of x
 	y        [2]int // max value of y
 	children []*QuadTree
 }
 
-func New(arr [][]int, depth int) *QuadTree {
+func New(arr [][]int, dp int) *QuadTree {
 
 	var newquadtree func(arr [][]int, depth int, lc, rc, tr, br int) *QuadTree
 	newquadtree = func(arr [][]int, depth int, lc, rc, tr, br int) *QuadTree {
@@ -26,6 +29,7 @@ func New(arr [][]int, depth int) *QuadTree {
 			val: sum,
 			x:   [2]int{tr, br},
 			y:   [2]int{lc, rc},
+			lvl: dp - depth,
 		}
 		if depth == 0 {
 			return qt
@@ -39,7 +43,7 @@ func New(arr [][]int, depth int) *QuadTree {
 		return qt
 	}
 
-	return newquadtree(arr, depth, 0, len(arr[0]), 0, len(arr))
+	return newquadtree(arr, dp, 0, len(arr[0]), 0, len(arr))
 }
 
 func (qt *QuadTree) Traverse() {
@@ -54,6 +58,38 @@ func (qt *QuadTree) Traverse() {
 		}
 	}
 	dfs(qt, 0)
+}
+
+func (qt QuadTree) FindRegions(value int) []*QuadTree {
+	arr := []*QuadTree{}
+	var dfs func(node *QuadTree, depth int)
+	dfs = func(node *QuadTree, depth int) {
+		if node == nil {
+			return
+		}
+		if node.val < value {
+			return
+		}
+		flag := false
+		for _, child := range node.children {
+			fmt.Println("For ", node, "child value::", child.val)
+			if child.val > value {
+
+				dfs(child, depth+1)
+				flag = true
+			}
+		}
+
+		if !flag {
+			fmt.Println("Flag", flag, "for ", node)
+			arr = append(arr, node)
+		}
+	}
+	dfs(&qt, 0)
+	for _, v := range arr {
+		fmt.Println(v.val, v.x, v.y)
+	}
+	return arr
 }
 
 func (qt *QuadTree) Add(value, x, y int) {
@@ -80,21 +116,22 @@ func (qt *QuadTree) Add(value, x, y int) {
 
 func main() {
 
-	arr := newFunction(10)
-	qt := New(arr, 3)
-	qt.Traverse()
-	qt.Add(5, 2, 5)
-	qt.Traverse()
+	arr := newFunction(256)
+	qt := New(arr, 4)
+	qt.FindRegions(256)
+	// qt.Traverse()
+	// qt.Add(5, 2, 5)
+	// qt.Traverse()
 }
 
 func newFunction(size int) [][]int {
 	x := size
 	arr := make([][]int, x)
 	for i := range arr {
-		arr[i] = make([]int, x+37)
+		arr[i] = make([]int, x)
 	}
 	for i := 0; i < x; i++ {
-		for j := 0; j < x+37; j++ {
+		for j := 0; j < x; j++ {
 			arr[i][j] = 1
 
 		}
