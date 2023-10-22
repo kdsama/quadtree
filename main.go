@@ -7,8 +7,8 @@ import (
 type QuadTree struct {
 	lvl      int
 	val      int
-	x        [2]int // max value of x
-	y        [2]int // max value of y
+	x        [2]int // start and end index of matrix row
+	y        [2]int // start and end index of matrix column
 	children []*QuadTree
 }
 
